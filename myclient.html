@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+      <script type="text/javascript">
+
+         var sock = null;
+         var wsuri = "ws://localhost:9009";
+
+         window.onload = function() {
+
+            sock = new WebSocket(wsuri);
+
+            sock.onopen = function() {
+               console.log("connected to " + wsuri);
+				document.getElementById('connection_status').innerHTML = "CONNECTED"
+				version();
+
+				window.setInterval( function(){sock.send(JSON.stringify({"type":"ack"}));}, 500);
+            }
+
+            sock.onclose = function(e) {
+				document.getElementById('connection_status').innerHTML = "DISCONNECTED"
+               console.log("connection closed (" + e.code + ")");
+            }
+
+            sock.onmessage = function(e) {
+               console.log("message received: " + e.data);
+				var data = JSON.parse(e.data);
+				if(data["type"] == "version")
+				{
+					document.getElementById('app_version').innerHTML = data["version"];
+				}
+				else if(data["type"] == "check_permissions")
+				{
+					if(data["correct"])
+						document.getElementById('permissions').innerHTML = "CORRECT";
+					else
+					document.getElementById('permissions').innerHTML = "NOT CORRECT";
+				}
+				else if(data["type"] == "permissions_fixing_output")
+				{
+					if(data["success"])
+						document.getElementById('permissions').innerHTML = "PERMISSIONS FIX SUCCESSFUL";
+					else
+						document.getElementById('permissions').innerHTML = "PERMISSIONS FIX FAILED " + data["error"];
+				}
+            }
+         };
+
+         function sendMessage(message) {
+            var msg = {"type":"message","text":message};
+            sock.send(JSON.stringify(msg));
+         };
+
+         function version() {
+            var msg = {"type":"version"};
+            sock.send(JSON.stringify(msg));
+         };
+
+		function checkPermissions()
+		{
+            var msg = {"type":"check_permissions"};
+            sock.send(JSON.stringify(msg));
+		};
+
+		function fixPermissions()
+		{
+            var msg = {"type":"fix_permissions"};
+            sock.send(JSON.stringify(msg));
+		};
+
+      </script>
+   </head>
+   <body>
+      <h1>WebSocket Echo Test</h1>
+		<p>
+			Status: <span id="connection_status">NOT CONNECTED</span>
+			WebSocket App Version: <span id="app_version">Unknown</span> <span id="permissions"></span>
+		</p>
+      <button onclick="version();">Version</button>
+      <button onclick="checkPermissions();">Check Permissions</button>
+      <button onclick="fixPermissions();">Fix Permissions</button>
+      <br />
+   
+
+</body></html>
