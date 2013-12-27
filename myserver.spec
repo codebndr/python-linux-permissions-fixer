@@ -1,6 +1,6 @@
 # -*- mode: python -*-
 a = Analysis(['myserver.py'],
-             pathex=['/home/tzikis/Desktop/python-websocket-daemon'],
+             pathex=['/home/tzikis/Desktop/python-linux-permissions-fixer'],
              hiddenimports=[],
              hookspath=None,
              runtime_hooks=None)
