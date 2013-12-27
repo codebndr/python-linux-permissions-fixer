@@ -45,7 +45,14 @@
 					else
 						document.getElementById('permissions').innerHTML = "PERMISSIONS FIX FAILED " + data["error"];
 				}
+            else if(data["type"] == "user_logout_dialog")
+            {
+               if(data["success"])
+                  document.getElementById('logout').innerHTML = "USER LOGOUT SUCCESSFUL";
+               else
+                  document.getElementById('logout').innerHTML = "USER LOGOUT FAILED ";
             }
+           }
          };
 
          function sendMessage(message) {
@@ -70,17 +77,24 @@
             sock.send(JSON.stringify(msg));
 		};
 
+      function logoutUser()
+      {
+            var msg = {"type":"logout_user"};
+            sock.send(JSON.stringify(msg));
+      };
+
       </script>
    </head>
    <body>
       <h1>WebSocket Echo Test</h1>
 		<p>
 			Status: <span id="connection_status">NOT CONNECTED</span>
-			WebSocket App Version: <span id="app_version">Unknown</span> <span id="permissions"></span>
+			WebSocket App Version: <span id="app_version">Unknown</span> <span id="permissions"></span> <span id="logout"></span>
 		</p>
       <button onclick="version();">Version</button>
       <button onclick="checkPermissions();">Check Permissions</button>
       <button onclick="fixPermissions();">Fix Permissions</button>
+      <button onclick="logoutUser();">Logout User</button>
       <br />
    
 

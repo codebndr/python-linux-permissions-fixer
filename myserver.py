@@ -45,6 +45,34 @@ debug = False;
 logging.basicConfig(filename='app.log', level=logging.INFO)
 logging.info("Starting")
 
+def logout_user_linux(websocket, quit_string):
+	d = gtk.Dialog()
+	d.add_buttons(gtk.STOCK_OK, 1, gtk.STOCK_CANCEL, 2)
+
+	label = gtk.Label(quit_string)
+	label.show()
+	d.vbox.pack_start(label)
+
+	result = d.run()
+	d.destroy()
+	while gtk.events_pending():
+		gtk.main_iteration()
+
+	if result == 1:
+		print "user selected quit"
+		websocket.sendMessage(json.dumps({"type":"user_logout_dialog","success":True}))
+		time.sleep(1)
+		os.system("gnome-session-quit --logout --no-prompt")
+	else:
+		websocket.sendMessage(json.dumps({"type":"user_logout_dialog","success":False}))
+		do_logout_user_linux(websocket, "You REALLY need to log out now to complete the process.")
+
+def do_logout_user_linux(websocket, quit_string):
+	# Create a thread as follows
+	try:
+		thread.start_new_thread(logout_user_linux, (websocket, quit_string,))
+	except:
+		print "Error: unable to start thread"
 
 def fucking_check_permissions_linux():
 	return os.system("groups | grep $(ls -l /dev/* | grep /dev/ttyS0 | cut -d ' ' -f 5)")
@@ -94,7 +122,9 @@ class EchoServerProtocol(WebSocketServerProtocol):
 			check_permissions_linux(self)
 		elif message["type"] == "fix_permissions":
 			do_fix_permissions_linux(self)
-			
+		elif message["type"] == "logout_user":
+			do_logout_user_linux(self, "You need to log out of your system to complete the process.")
+
 
 	def onConnect(self, request):
 		if(debug):
