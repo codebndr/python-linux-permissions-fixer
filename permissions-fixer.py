@@ -204,7 +204,22 @@ def exit_program(exit_code):
 
 log.startLogging(sys.stdout)
 
+def showDialog(message):
+	d = gtk.Dialog()
+	d.add_buttons(gtk.STOCK_OK, 1)
+
+	label = gtk.Label(message)
+	label.show()
+	d.vbox.pack_start(label)
+
+	d.run()
+	d.destroy()
+	while gtk.events_pending():
+		gtk.main_iteration()
+
 def main():
+
+	showDialog("Permissions Fixer Started.\n\nReturn to the codebender walkthrough\nto complete the process.\n")
 
 	try:
 		ServerFactory = BroadcastServerFactory
