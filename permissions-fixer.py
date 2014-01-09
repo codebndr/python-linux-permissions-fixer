@@ -124,6 +124,8 @@ class EchoServerProtocol(WebSocketServerProtocol):
 			do_fix_permissions_linux(self)
 		elif message["type"] == "logout_user":
 			do_logout_user_linux(self, "You need to log out of your system to complete the process.")
+		elif message["type"] == "close":
+			exit_program("Permission Fixer Exiting..")
 
 
 	def onConnect(self, request):
