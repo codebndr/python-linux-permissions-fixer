@@ -231,7 +231,7 @@ def main():
 
 		reactor.run()
 	except error.CannotListenError, e:
-		exit_program('ERROR: Could not communicate with the browser.\nSome other service is using the port (9000).\nPlease contact us at girder@codebender.cc\n')
+		exit_program('ERROR: Could not communicate with the browser.\nSome other service is using the port (9009).\nPlease contact us at girder@codebender.cc\n')
 
 
 # ?
