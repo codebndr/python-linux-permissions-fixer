@@ -65,7 +65,7 @@ def logout_user_linux(websocket, quit_string):
 		os.system("gnome-session-quit --logout --no-prompt")
 	else:
 		websocket.sendMessage(json.dumps({"type":"user_logout_dialog","success":False}))
-		do_logout_user_linux(websocket, "You REALLY need to log out now to complete the process.")
+		do_logout_user_linux(websocket, "You REALLY need to log out now.")
 
 def do_logout_user_linux(websocket, quit_string):
 	# Create a thread as follows
