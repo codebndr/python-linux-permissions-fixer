@@ -2,19 +2,16 @@ import sys
 import logging
 
 import os
-import serial
-from serial.tools import list_ports
 
 import thread
 import threading
 
-#needed for py2exe
+# needed for py2exe
 import zope.interface
 from twisted.internet import reactor
 from twisted.internet import error
 from twisted.python import log
 
-#needed for py2exe
 import autobahn.resource
 from autobahn.websocket import HttpException, WebSocketServerFactory, WebSocketServerProtocol, listenWS
 from autobahn import httpstatus
