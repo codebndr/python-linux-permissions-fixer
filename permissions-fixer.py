@@ -6,6 +6,9 @@ import os
 import thread
 import threading
 
+# needed to split correctly bash commands
+import shlex
+
 # needed for py2exe
 import zope.interface
 from twisted.internet import reactor
@@ -58,14 +61,9 @@ def logout_user_linux(websocket, quit_string):
 	if result == 1:
 		print "user selected quit"
 		websocket.sendMessage(json.dumps({"type":"user_logout_dialog","success":True}))
-		quitWay = logout_way()
-        time.sleep(1)
+		quitWay = shlex.split(logout_way())
         try:
-            if quitWay == 0:
-		        os.system("gnome-session-quit --logout --no-prompt")
-            else:
-                # Older Ubuntu Method to Logout
-                os.system("gnome-session-save --logout")
+            subprocess.Popen(quitWay)
         except:
 		    websocket.sendMessage(json.dumps({"type":"user_logout_dialog","success":False}))
 		    do_logout_user_linux(websocket, "You REALLY need to log out now.")
@@ -78,8 +76,18 @@ def do_logout_user_linux(websocket, quit_string):
 		print "Error: unable to start thread"
 
 def logout_way():
-    # a way to find out how the system logs out
-    return subprocess.call(["which", "gnome-session-quit"])
+    # a way to find out how the system logs out from a selection of known commands
+    logoutCommands = [
+            {'dist': 'ubuntu1104', 'command':'gnome-session-save', 'args':' --logout'},
+            {'dist': 'ubuntu1204', 'command':'gnome-session-quit', 'args':' --logout --no-prompt'},
+            {'dist': 'xubuntu1204', 'command':'xfce4-session-logout', 'args':' --logout'},
+    ]
+    for logoutCommand in logoutCommands:
+        dist = logoutCommand['dist']
+        command = logoutCommand['command']
+        valid = subprocess.call(["which", command])
+        if valid == 0:
+            return command + logoutCommand['args']
 
 def fucking_check_permissions_linux():
 	return os.system("groups | grep $(ls -l /dev/* | grep /dev/ttyS0 | cut -d ' ' -f 5)")
