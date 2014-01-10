@@ -58,11 +58,17 @@ def logout_user_linux(websocket, quit_string):
 	if result == 1:
 		print "user selected quit"
 		websocket.sendMessage(json.dumps({"type":"user_logout_dialog","success":True}))
-		time.sleep(1)
-		os.system("gnome-session-quit --logout --no-prompt")
-	else:
-		websocket.sendMessage(json.dumps({"type":"user_logout_dialog","success":False}))
-		do_logout_user_linux(websocket, "You REALLY need to log out now.")
+		quitWay = logout_way()
+        time.sleep(1)
+        try:
+            if quitWay == 0:
+		        os.system("gnome-session-quit --logout --no-prompt")
+            else:
+                # Older Ubuntu Method to Logout
+                os.system("gnome-session-save --logout")
+        except:
+		    websocket.sendMessage(json.dumps({"type":"user_logout_dialog","success":False}))
+		    do_logout_user_linux(websocket, "You REALLY need to log out now.")
 
 def do_logout_user_linux(websocket, quit_string):
 	# Create a thread as follows
@@ -70,6 +76,10 @@ def do_logout_user_linux(websocket, quit_string):
 		thread.start_new_thread(logout_user_linux, (websocket, quit_string,))
 	except:
 		print "Error: unable to start thread"
+
+def logout_way():
+    # a way to find out how the system logs out
+    return subprocess.call(["which", "gnome-session-quit"])
 
 def fucking_check_permissions_linux():
 	return os.system("groups | grep $(ls -l /dev/* | grep /dev/ttyS0 | cut -d ' ' -f 5)")
