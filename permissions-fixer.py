@@ -87,12 +87,12 @@ def logout_way():
             return command + logoutCommand['args']
 
 def fucking_check_permissions_linux():
-    p1 = Popen(["groups"], stdout=PIPE)
-    p2 = Popen(["grep", "$(ls -l /dev/*"], stdin=p1.stdout, stdout=PIPE)
+    p1 = subversion.Popen(["groups"], stdout=PIPE)
+    p2 = subversion.Popen(["grep", "$(ls -l /dev/*"], stdin=p1.stdout, stdout=PIPE)
     p1.stdout.close()  # Allow p1 to receive a SIGPIPE if p2 exits.
-    p3 = Popen(["grep", "/dev/ttyS0"], stdin=p2.stdout, stdout=PIPE)
+    p3 = subversion.Popen(["grep", "/dev/ttyS0"], stdin=p2.stdout, stdout=PIPE)
     p2.stdout.close()
-    p4 = Popen(["grep", "-d", "'", "'", "-f", "5"], stdin=p3.stdout, stdout=PIPE)
+    p4 = subversion.Popen(["grep", "-d", "'", "'", "-f", "5"], stdin=p3.stdout, stdout=PIPE)
     p3.stdout.close()
     output = p4.communicate()[0]
     if (debug):
@@ -107,10 +107,10 @@ def check_permissions_linux(websocket):
 		websocket.sendMessage(json.dumps({"type":"check_permissions","correct":False}))
 
 def fucking_fix_permissions_linux():
-    p1 = Popen(["pkexec", "gpasswd", "-a", "`whoami`", "$(ls -l /dev/*"], stdout=PIPE)
-    p2 = Popen(["grep", "/dev/ttyS0"], stdin=p1.stdout, stdout=PIPE)
+    p1 = subversion.Popen(["pkexec", "gpasswd", "-a", "`whoami`", "$(ls -l /dev/*"], stdout=PIPE)
+    p2 = subversion.Popen(["grep", "/dev/ttyS0"], stdin=p1.stdout, stdout=PIPE)
     p1.stdout.close()
-    p3 = Popen(["cut", "-d", "'", "'", "-f", "5"], stdin=p2.stdout, stdout=PIPE)
+    p3 = subversion.Popen(["cut", "-d", "'", "'", "-f", "5"], stdin=p2.stdout, stdout=PIPE)
     p2.stdout.close()
     output = p4.communicate()[0]
     if (debug):
