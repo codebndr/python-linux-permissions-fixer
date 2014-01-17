@@ -20,11 +20,8 @@ from autobahn.websocket import HttpException, WebSocketServerFactory, WebSocketS
 from autobahn import httpstatus
 
 import json
-
 import time
-
 import subprocess
-
 
 import base64
 import tempfile
@@ -40,7 +37,7 @@ except ImportError:
 
 import gtk
 
-debug = False;
+debug = True;
 
 logging.basicConfig(filename='app.log', level=logging.INFO)
 logging.info("Starting")
@@ -79,7 +76,7 @@ def logout_way():
     # a way to find out how the system logs out from a selection of known commands
     logoutCommands = [
             {'dist': 'ubuntu1104', 'command':'gnome-session-save', 'args':' --logout'},
-            {'dist': 'ubuntu1204', 'command':'gnome-session-quit', 'args':' --logout --no-prompt'},
+            {'dist': 'ubuntu1204', 'command':'gksudo gnome-session-quit', 'args':' --logout --no-prompt'},
             {'dist': 'xubuntu1204', 'command':'xfce4-session-logout', 'args':' --logout'},
     ]
     for logoutCommand in logoutCommands:
@@ -90,7 +87,17 @@ def logout_way():
             return command + logoutCommand['args']
 
 def fucking_check_permissions_linux():
-	return os.system("groups | grep $(ls -l /dev/* | grep /dev/ttyS0 | cut -d ' ' -f 5)")
+    p1 = Popen(["groups"], stdout=PIPE)
+    p2 = Popen(["grep", "$(ls -l /dev/*"], stdin=p1.stdout, stdout=PIPE)
+    p1.stdout.close()  # Allow p1 to receive a SIGPIPE if p2 exits.
+    p3 = Popen(["grep", "/dev/ttyS0"], stdin=p2.stdout, stdout=PIPE)
+    p2.stdout.close()
+    p4 = Popen(["grep", "-d", "'", "'", "-f", "5"], stdin=p3.stdout, stdout=PIPE)
+    p3.stdout.close()
+    output = p4.communicate()[0]
+    if (debug):
+        print output
+    return output
 
 def check_permissions_linux(websocket):
 	retval = fucking_check_permissions_linux()
@@ -100,7 +107,16 @@ def check_permissions_linux(websocket):
 		websocket.sendMessage(json.dumps({"type":"check_permissions","correct":False}))
 
 def fucking_fix_permissions_linux():
-	return os.system("pkexec gpasswd -a `whoami` $(ls -l /dev/* | grep /dev/ttyS0 | cut -d ' ' -f 5)")
+    p1 = Popen(["pkexec", "gpasswd", "-a", "`whoami`", "$(ls -l /dev/*"], stdout=PIPE)
+    p2 = Popen(["grep", "/dev/ttyS0"], stdin=p1.stdout, stdout=PIPE)
+    p1.stdout.close()
+    p3 = Popen(["cut", "-d", "'", "'", "-f", "5"], stdin=p2.stdout, stdout=PIPE)
+    p2.stdout.close()
+    output = p4.communicate()[0]
+    if (debug):
+        print output
+    return output
+    #return os.system("pkexec gpasswd -a `whoami` $(ls -l /dev/* | grep /dev/ttyS0 | cut -d ' ' -f 5)")
 
 def fix_permissions_linux(websocket):
 	retval = fucking_fix_permissions_linux()
@@ -157,7 +173,7 @@ class EchoServerProtocol(WebSocketServerProtocol):
 			print "protocols " + str(request.protocols)
 
 		#TODO: For development purposes only. Fix this so it doesn't work for null (localhost) as well.
-		if(request.peer.host != "127.0.0.1" or (request.origin != "null" and request.origin != "http://codebender.cc"  and request.origin != "https://codebender.cc")):
+        elif(request.peer.host != "127.0.0.1" or (request.origin != "null" and request.origin != "http://codebender.cc"  and request.origin != "https://codebender.cc")):
 			raise HttpException(httpstatus.HTTP_STATUS_CODE_UNAUTHORIZED[0], "You are not authorized for this!")
 
 	def onOpen(self):
