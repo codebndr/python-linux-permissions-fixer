@@ -87,12 +87,12 @@ def logout_way():
             return command + logoutCommand['args']
 
 def fucking_check_permissions_linux():
-    p1 = subversion.Popen(["groups"], stdout=PIPE)
-    p2 = subversion.Popen(["grep", "$(ls -l /dev/*"], stdin=p1.stdout, stdout=PIPE)
+    p1 = subprocess.Popen(["groups"], stdout=PIPE)
+    p2 = subprocess.Popen(["grep", "$(ls -l /dev/*"], stdin=p1.stdout, stdout=PIPE)
     p1.stdout.close()  # Allow p1 to receive a SIGPIPE if p2 exits.
-    p3 = subversion.Popen(["grep", "/dev/ttyS0"], stdin=p2.stdout, stdout=PIPE)
+    p3 = subprocess.Popen(["grep", "/dev/ttyS0"], stdin=p2.stdout, stdout=PIPE)
     p2.stdout.close()
-    p4 = subversion.Popen(["grep", "-d", "'", "'", "-f", "5"], stdin=p3.stdout, stdout=PIPE)
+    p4 = subprocess.Popen(["grep", "-d", "'", "'", "-f", "5"], stdin=p3.stdout, stdout=PIPE)
     p3.stdout.close()
     output = p4.communicate()[0]
     if (debug):
@@ -107,10 +107,10 @@ def check_permissions_linux(websocket):
 		websocket.sendMessage(json.dumps({"type":"check_permissions","correct":False}))
 
 def fucking_fix_permissions_linux():
-    p1 = subversion.Popen(["pkexec", "gpasswd", "-a", "`whoami`", "$(ls -l /dev/*"], stdout=PIPE)
-    p2 = subversion.Popen(["grep", "/dev/ttyS0"], stdin=p1.stdout, stdout=PIPE)
+    p1 = subprocess.Popen(["pkexec", "gpasswd", "-a", "`whoami`", "$(ls -l /dev/*"], stdout=PIPE)
+    p2 = subprocess.Popen(["grep", "/dev/ttyS0"], stdin=p1.stdout, stdout=PIPE)
     p1.stdout.close()
-    p3 = subversion.Popen(["cut", "-d", "'", "'", "-f", "5"], stdin=p2.stdout, stdout=PIPE)
+    p3 = subprocess.Popen(["cut", "-d", "'", "'", "-f", "5"], stdin=p2.stdout, stdout=PIPE)
     p2.stdout.close()
     output = p4.communicate()[0]
     if (debug):
@@ -174,7 +174,7 @@ class EchoServerProtocol(WebSocketServerProtocol):
 
 		#TODO: For development purposes only. Fix this so it doesn't work for null (localhost) as well.
         elif(request.peer.host != "127.0.0.1" or (request.origin != "null" and request.origin != "http://codebender.cc"  and request.origin != "https://codebender.cc")):
-			raise HttpException(httpstatus.HTTP_STATUS_CODE_UNAUTHORIZED[0], "You are not authorized for this!")
+            raise HttpException(httpstatus.HTTP_STATUS_CODE_UNAUTHORIZED[0], "You are not authorized for this!")
 
 	def onOpen(self):
 		self.factory.register(self)
